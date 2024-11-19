@@ -1,5 +1,5 @@
 # Tetris_Multi
 
-Repository for Tetris Multiplayer Client
-Made with Unity 
-Edit
+Repository for Tetris Multiplayer Game
+Cilent - Unity
+Server - C 
