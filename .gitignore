@@ -50,3 +50,6 @@ crashlytics-build.properties
 # Include important files explicitly
 !.gitignore
 !README.md
+
+# Visual Studio code
+.vscode/*
