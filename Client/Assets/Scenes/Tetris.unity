@@ -662,6 +662,8 @@ MonoBehaviour:
     tile: {fileID: 11400000, guid: 9698b5c19893c5a4a873313cc1eb0df0, type: 2}
   - tetromino: 6
     tile: {fileID: 11400000, guid: b6a101b2b8b7a2e4fab4e81a38372bb4, type: 2}
+  spawnPosition: {x: -1, y: 8, z: 0}
+  boardSize: {x: 10, y: 20}
 --- !u!1 &1695791736
 GameObject:
   m_ObjectHideFlags: 0
