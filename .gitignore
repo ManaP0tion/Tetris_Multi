@@ -52,4 +52,4 @@ crashlytics-build.properties
 !README.md
 
 # Visual Studio code
-.vscode/*
+.vscode/
