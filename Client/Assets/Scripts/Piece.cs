@@ -38,16 +38,16 @@ public class Piece : MonoBehaviour
         this.board.Clear(this);
         this.lockTime += Time.deltaTime;
 
-        if(Input.GetKey(KeyCode.LeftArrow )){
+        if(Input.GetKeyDown(KeyCode.LeftArrow )){
             Move(Vector2Int.left);
             //Debug.Log("left arrow");
         }
-        else if (Input.GetKey(KeyCode.RightArrow )){
+        else if (Input.GetKeyDown(KeyCode.RightArrow )){
             Move(Vector2Int.right);
             //Debug.Log("right arrow");
         }
 
-        if(Input.GetKey(KeyCode.DownArrow)){
+        if(Input.GetKeyDown(KeyCode.DownArrow)){
             Move(Vector2Int.down);
         }
 
