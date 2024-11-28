@@ -15,7 +15,9 @@ typedef struct {
 } cli;
 
 pthread_mutex_t client_mutex = PTHREAD_MUTEX_INITIALIZER; // use mutex
+pthread_mutex_t check_mutex = PTHREAD_MUTEX_INITIALIZER; // use mutex
 cli *first_cli = NULL; // save first client
+int cli_port=PORTNUM+1;			
 
 void *connect_cli(void *arg) {
     cli *client = (cli *)arg;
@@ -46,8 +48,13 @@ void *connect_cli(void *arg) {
         first_cli = NULL;
 
         printf("matching\n");
-	
-	int listen_port = PORTNUM + 1; // port +1
+		pthread_mutex_lock(&check_mutex);
+		int listen_port; // port +1
+		listen_port=cli_port++;
+	if(cli_port>30000){
+		cli_port=PORTNUM+1;
+	}
+		pthread_mutex_unlock(&check_mutex);
 
 	/* can error!! when fisrt listener!!, and PORTNUM must up one by one!!*/
 
@@ -126,3 +133,4 @@ int main() {
     close(sd);
     return 0;
 }
+
