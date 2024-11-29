@@ -1,15 +1,19 @@
- using UnityEngine;
+using UnityEngine;
 using UnityEngine.Tilemaps;
-
+using UnityEngine.Networking;
+using System.Collections;
 public class Board : MonoBehaviour
 {
     public Tilemap tilemap{get; private set;}
     public Piece activePiece{ get; private set; }
     public TetrominoData[] tetrominoes;
-    
     public Vector3Int spawnPosition;
     public Vector2Int boardSize = new Vector2Int(10, 20);
+    public TileBase testTile;
 
+    private NetworkManager networkManager;
+
+    
     public RectInt Bounds{
         get{
             Vector2Int position = new Vector2Int(-this.boardSize.x/2, -this.boardSize.y/2);
@@ -27,6 +31,7 @@ public class Board : MonoBehaviour
     }
 
     private void Start(){
+        networkManager = FindObjectOfType<NetworkManager>();
         SpawnPiece();
     }
 
@@ -86,15 +91,21 @@ public class Board : MonoBehaviour
     public void ClearLines(){
         RectInt bound = this.Bounds;
         int row = Bounds.yMin;
+        int linesCleared = 0;
 
         while(row < Bounds.yMax)
         {
             if(IsLineFull(row)){
                 LineClear(row);
+                linesCleared++;
+                //Debug.Log(linesCleared);
             }
             else{
                 row++;
             }
+        }
+        if(linesCleared > 0){
+            networkManager.SendLineClear(linesCleared);
         }
     }
 
@@ -129,5 +140,45 @@ public class Board : MonoBehaviour
             }
         }
         return true;
+    }
+
+    public void AddLines(int lineCount)
+    {
+        RectInt bounds = this.Bounds;
+
+        // 기존 라인을 위로 이동
+        for (int row = bounds.yMax - 1; row >= bounds.yMin + lineCount; row--)
+        {
+            for (int col = bounds.xMin; col < bounds.xMax; col++)
+            {
+                Vector3Int currentPosition = new Vector3Int(col, row, 0);
+                Vector3Int newPosition = new Vector3Int(col, row - lineCount, 0);
+
+                TileBase tile = this.tilemap.GetTile(newPosition); // 아래 라인의 타일 가져오기
+                this.tilemap.SetTile(currentPosition, tile); // 현재 위치에 설정
+            }
+        }
+
+        // 새로운 줄을 추가 (랜덤 배치)
+        System.Random random = new System.Random();
+        for (int row = bounds.yMin; row < bounds.yMin + lineCount; row++)
+        {
+            for (int col = bounds.xMin; col < bounds.xMax; col++)
+            {
+                Vector3Int position = new Vector3Int(col, row, 0);
+
+                // 일정 확률로 빈 칸 또는 블록 추가
+                if (random.Next(0, 10) < 7) // 70% 확률로 블록 추가
+                {
+                    this.tilemap.SetTile(position, testTile);
+                }
+                else
+                {
+                    this.tilemap.SetTile(position, null); // 빈 칸
+                }
+            }
+        }
+
+        Debug.Log($"Added {lineCount} lines to the bottom of the board.");
     }
 }

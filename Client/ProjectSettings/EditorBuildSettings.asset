@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/Scenes/Tetris.unity
+    guid: e6af2ec0210e94212b89f2b3a1a66abe
   m_configObjects: {}

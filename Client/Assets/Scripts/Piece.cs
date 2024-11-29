@@ -62,6 +62,10 @@ public class Piece : MonoBehaviour
             Step();
         }
 
+        if(Input.GetKeyDown(KeyCode.T)){
+            board.AddLines(1);
+        }
+
         this.board.Set(this);
     }
 
