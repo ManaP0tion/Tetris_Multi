@@ -16,7 +16,7 @@ public class NetworkManager : MonoBehaviour
     {
         try
         {
-            client = new TcpClient("127.0.0.1", 27015); // 서버 IP와 포트
+            client = new TcpClient("211.188.49.52", 27015); // 서버 IP와 포트
             stream = client.GetStream();
             Debug.Log("Connected to server.");
         }

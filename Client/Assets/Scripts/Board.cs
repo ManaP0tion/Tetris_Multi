@@ -181,6 +181,4 @@ public class Board : MonoBehaviour
 
         Debug.Log($"Added {lineCount} lines to the bottom of the board.");
     }
-
-    
 }
