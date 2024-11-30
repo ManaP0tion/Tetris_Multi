@@ -16,7 +16,8 @@ public class NetworkManager : MonoBehaviour
     {
         try
         {
-            client = new TcpClient("211.188.49.52", 27015); // 서버 IP와 포트
+            //client = new TcpClient("211.188.49.52", 27015);   // naver
+            client = new TcpClient("172.27.123.18", 27015);     // wsl
             stream = client.GetStream();
             Debug.Log("Connected to server.");
         }
@@ -36,7 +37,9 @@ public class NetworkManager : MonoBehaviour
             Debug.Log($"Sent line clear data: {message}");
         }
     }
-
+    private void Update() {
+        ReceiveData();
+    }
     public void ReceiveData()
     {
         if (client != null && stream != null && stream.DataAvailable)
@@ -44,7 +47,7 @@ public class NetworkManager : MonoBehaviour
             byte[] buffer = new byte[1024];
             int bytesRead = stream.Read(buffer, 0, buffer.Length);
             string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-
+            Debug.Log($"Received from server: {message}"); // 모든 메시지 로깅
             // 처리 로직
             HandleServerMessage(message);
         }
@@ -52,10 +55,11 @@ public class NetworkManager : MonoBehaviour
 
     private void HandleServerMessage(string message)
     {
-        if (message.StartsWith("ADD:"))
+        if (message.StartsWith("CLEAR:"))
         {
-            int linesToAdd = int.Parse(message.Split(':')[1]);
+            int linesToAdd = int.Parse(message.Split(':')[1]); // 숫자 추출
             FindObjectOfType<Board>().AddLines(linesToAdd);
+            Debug.Log($"Adding {linesToAdd} lines to the board.");
         }
     }
 
