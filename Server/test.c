@@ -5,7 +5,9 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#define PORT 27015
+#define PORT 12056
+
+void receiving(char* data);
 
 int main() {
     int server_fd, new_socket;
@@ -43,10 +45,30 @@ int main() {
     }
 
     // 데이터 읽기
-    read(new_socket, buffer, 1024);
-    printf("Message from client: %s\n", buffer);
+    while (1) {
+        memset(buffer, 0, 1024);
+        int bytes_received = read(new_socket, buffer, 1024);
+        if (bytes_received <= 0) {
+            printf("disconect\n");
+            break;
+        }
+        receiving(buffer);
+        fflush(stdout);
+    }
 
     close(new_socket);
     close(server_fd);
     return 0;
+}
+
+void receiving(char* data){
+    char name[1024];
+    int value;
+    if(sscanf(data, "%1023[^:]:%d", name, &value) != 2){ //문자열 파싱
+        printf("INVALID INPUT FORMAT\n");
+        return;
+    }
+    if(!strcmp(name, "CLEAR")){
+        printf("Value is %d\n", value);
+    }
 }
