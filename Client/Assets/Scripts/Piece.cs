@@ -58,6 +58,11 @@ public class Piece : MonoBehaviour
             if(Input.GetKeyDown(KeyCode.Z)){
                 Rotate(-1);
             }
+
+            if(Input.GetKeyDown(KeyCode.X)){
+                Rotate(1);
+            }
+
             if(Time.time >= this.stepTime){
                 Step();
             }

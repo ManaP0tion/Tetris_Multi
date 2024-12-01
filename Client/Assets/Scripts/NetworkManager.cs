@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
@@ -7,9 +8,16 @@ public class NetworkManager : MonoBehaviour
     private TcpClient client;
     private NetworkStream stream;
     public bool IsGameReady { get; private set; }
+    public Board board;
+
+    public float updateInterval = 1f;
 
     private void Start()
     {
+        if (board == null)
+        {
+            board = FindObjectOfType<Board>();
+        }
         ConnectToServer();
     }
 
@@ -40,7 +48,13 @@ public class NetworkManager : MonoBehaviour
     }
     private void Update() {
         ReceiveData();
+        /*
+        if (IsGameReady && board != null)
+        {
+            StartCoroutine(BoardUpdate());
+        }*/
     }
+    
     public void ReceiveData()
     {
         if (client != null && stream != null && stream.DataAvailable)
@@ -62,11 +76,11 @@ public class NetworkManager : MonoBehaviour
             FindObjectOfType<Board>().AddLines(linesToAdd);
             Debug.Log($"Adding {linesToAdd} lines to the board.");
         }
-        if (message.Contains("게임 시작"))
+        if (message.Contains("GAMESTART"))
         {
             Debug.Log("Game Start received from server.");
             // 게임 시작 로직 트리거
-             IsGameReady = true;
+            IsGameReady = true;
         }
     }
 
@@ -86,4 +100,25 @@ public class NetworkManager : MonoBehaviour
         stream?.Close();
         client?.Close();
     }
+
+        /*
+    public void SendBoardState(string boardState)
+    {
+        if (client != null && stream != null)
+        {
+            string message = "BOARD_STATE:" + boardState;
+            byte[] data = Encoding.UTF8.GetBytes(message);
+            stream.Write(data, 0, data.Length);
+            //Debug.Log("Board state sent to server.");
+        }
+    }
+
+    IEnumerator BoardUpdate(){
+        while(true){
+            SendBoardState(board.GetBoardStateAsString());
+            yield return new WaitForSeconds(updateInterval);
+        }
+    }
+    */
+
 }
