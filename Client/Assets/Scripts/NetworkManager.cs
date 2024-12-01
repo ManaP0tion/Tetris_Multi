@@ -6,6 +6,7 @@ public class NetworkManager : MonoBehaviour
 {
     private TcpClient client;
     private NetworkStream stream;
+    public bool IsGameReady { get; private set; }
 
     private void Start()
     {
@@ -16,8 +17,8 @@ public class NetworkManager : MonoBehaviour
     {
         try
         {
-            //client = new TcpClient("211.188.49.52", 27015);   // naver
-            client = new TcpClient("172.27.123.18", 27015);     // wsl
+            client = new TcpClient("211.188.49.52", 27015);   // naver
+            //client = new TcpClient("172.27.123.18", 27015);     // wsl
             stream = client.GetStream();
             Debug.Log("Connected to server.");
         }
@@ -60,6 +61,23 @@ public class NetworkManager : MonoBehaviour
             int linesToAdd = int.Parse(message.Split(':')[1]); // 숫자 추출
             FindObjectOfType<Board>().AddLines(linesToAdd);
             Debug.Log($"Adding {linesToAdd} lines to the board.");
+        }
+        if (message.Contains("게임 시작"))
+        {
+            Debug.Log("Game Start received from server.");
+            // 게임 시작 로직 트리거
+             IsGameReady = true;
+        }
+    }
+
+    public void SendGameOver()
+    {
+        if (client != null && stream != null)
+        {
+            string message = "GAME_OVER";
+            byte[] data = Encoding.UTF8.GetBytes(message);
+            stream.Write(data, 0, data.Length);
+            Debug.Log("Sent game over message to server.");
         }
     }
 

@@ -37,36 +37,37 @@ public class Piece : MonoBehaviour
     private void Update() {
         this.board.Clear(this);
         this.lockTime += Time.deltaTime;
+        if(this.board.EnableInput == true){
+            if(Input.GetKeyDown(KeyCode.LeftArrow )){
+                Move(Vector2Int.left);
+                //Debug.Log("left arrow");
+            }
+            else if (Input.GetKeyDown(KeyCode.RightArrow )){
+                Move(Vector2Int.right);
+                //Debug.Log("right arrow");
+            }
 
-        if(Input.GetKeyDown(KeyCode.LeftArrow )){
-            Move(Vector2Int.left);
-            //Debug.Log("left arrow");
-        }
-        else if (Input.GetKeyDown(KeyCode.RightArrow )){
-            Move(Vector2Int.right);
-            //Debug.Log("right arrow");
-        }
+            if(Input.GetKeyDown(KeyCode.DownArrow)){
+                Move(Vector2Int.down);
+            }
 
-        if(Input.GetKeyDown(KeyCode.DownArrow)){
-            Move(Vector2Int.down);
-        }
+            if(Input.GetKeyDown(KeyCode.Space)){
+                HardDrop();
+            }
 
-        if(Input.GetKeyDown(KeyCode.Space)){
-            HardDrop();
-        }
+            if(Input.GetKeyDown(KeyCode.Z)){
+                Rotate(-1);
+            }
+            if(Time.time >= this.stepTime){
+                Step();
+            }
 
-        if(Input.GetKeyDown(KeyCode.Z)){
-            Rotate(-1);
-        }
-        if(Time.time >= this.stepTime){
-            Step();
-        }
+            if(Input.GetKeyDown(KeyCode.T)){
+                board.AddLines(1);
+            }
 
-        if(Input.GetKeyDown(KeyCode.T)){
-            board.AddLines(1);
+            this.board.Set(this);
         }
-
-        this.board.Set(this);
     }
 
     private void Lock(){

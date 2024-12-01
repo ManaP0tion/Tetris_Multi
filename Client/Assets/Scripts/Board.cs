@@ -10,6 +10,7 @@ public class Board : MonoBehaviour
     public Vector3Int spawnPosition;
     public Vector2Int boardSize = new Vector2Int(10, 20);
     public TileBase testTile;
+    public bool EnableInput;
 
     private NetworkManager networkManager;
 
@@ -33,6 +34,16 @@ public class Board : MonoBehaviour
     private void Start(){
         networkManager = FindObjectOfType<NetworkManager>();
         SpawnPiece();
+        EnableInput = false;                    // 인풋 못하게 하려고 설정한변수임
+        Time.timeScale = 0;                     // 게임 일시정지
+        StartCoroutine(WaitForGameStart());     // 클라 2개 연결될때 까지 대기함
+    }
+
+    IEnumerator WaitForGameStart()
+    {
+        yield return new WaitUntil(() => networkManager.IsGameReady);
+        EnableInput = true;
+        Time.timeScale = 1;
     }
 
     public void SpawnPiece(){
@@ -46,11 +57,21 @@ public class Board : MonoBehaviour
         }
         else{
             GameOver();
-        }
+        } 
     }
 
     private void GameOver(){
         this.tilemap.ClearAllTiles();
+        Debug.Log("Game over");
+
+        // 서버에게 게임 오버 메시지 전송
+        if (networkManager != null)
+        {
+            networkManager.SendGameOver();
+        }
+
+        // 게임을 5초 후에 재시작
+        Invoke(nameof(RestartGame), 5f);
     }
     public void Set(Piece piece)
     {
@@ -59,6 +80,18 @@ public class Board : MonoBehaviour
             this.tilemap.SetTile(tilePosition, piece.data.tile);
         }
         
+    }
+
+    private void RestartGame()
+    {
+        // Clear existing pieces and reset the board
+        this.tilemap.ClearAllTiles();
+        Debug.Log("Restarting game...");
+
+        // Optionally reset any other necessary state here
+
+        // Start a new game
+        SpawnPiece();
     }
 
     public void Clear(Piece piece)
