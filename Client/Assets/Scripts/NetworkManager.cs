@@ -25,8 +25,8 @@ public class NetworkManager : MonoBehaviour
     {
         try
         {
-            //client = new TcpClient("211.188.49.52", 27015);   // naver
-            client = new TcpClient("172.27.123.18", 27015);     // wsl
+            client = new TcpClient("211.188.49.52", 27015);   // naver
+            //client = new TcpClient("172.27.123.18", 27015);     // wsl
             stream = client.GetStream();
             Debug.Log("Connected to server.");
         }
