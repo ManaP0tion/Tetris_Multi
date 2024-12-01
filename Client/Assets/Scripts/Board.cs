@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Text;
 public class Board : MonoBehaviour
 {
     public Tilemap tilemap{get; private set;}
@@ -36,9 +37,16 @@ public class Board : MonoBehaviour
         SpawnPiece();
         EnableInput = false;                    // 인풋 못하게 하려고 설정한변수임
         Time.timeScale = 0;                     // 게임 일시정지
-        StartCoroutine(WaitForGameStart());     // 클라 2개 연결될때 까지 대기함
+        //StartCoroutine(WaitForGameStart());     // 클라 2개 연결될때 까지 대기함
     }
 
+    private void Update() {
+        if(networkManager.IsGameReady == true){
+            EnableInput = true;
+            Time.timeScale = 1;
+        }
+    }
+    
     IEnumerator WaitForGameStart()
     {
         yield return new WaitUntil(() => networkManager.IsGameReady);
@@ -214,4 +222,25 @@ public class Board : MonoBehaviour
 
         Debug.Log($"Added {lineCount} lines to the bottom of the board.");
     }
+
+    /*
+    public string GetBoardStateAsString()
+    {
+        StringBuilder boardData = new StringBuilder();
+        RectInt bounds = this.Bounds;
+        for (int y = bounds.yMin; y < bounds.yMax; y++)
+        {
+            for (int x = bounds.xMin; x < bounds.xMax; x++)
+            {
+                Vector3Int pos = new Vector3Int(x, y, 0);
+                boardData.Append(tilemap.HasTile(pos) ? "1" : "0");
+            }
+        }
+        string boardState = boardData.ToString();
+        //Debug.Log("Current board state: " + boardState);    
+
+
+        return boardState;
+    }
+    */
 }
