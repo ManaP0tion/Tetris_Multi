@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
@@ -77,6 +78,18 @@ public class Piece : MonoBehaviour
 
     private void Lock(){
         this.board.Set(this);
+
+         // 변경된 셀 감지 및 전송
+        List<(int x, int y, bool hasTile)> changes = this.board.GetChangedTiles();
+        if (changes.Count > 0)
+        {
+            NetworkManager networkManager = FindObjectOfType<NetworkManager>();
+            if (networkManager != null)
+            {
+                networkManager.SendChangedTiles(changes);
+            }
+        }
+
         this.board.ClearLines();
         this.board.SpawnPiece();
     }

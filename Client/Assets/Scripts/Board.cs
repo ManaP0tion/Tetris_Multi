@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.Networking;
+using System.Collections.Generic;
 using System.Collections;
 using System.Text;
 public class Board : MonoBehaviour
@@ -12,6 +13,7 @@ public class Board : MonoBehaviour
     public Vector2Int boardSize = new Vector2Int(10, 20);
     public TileBase testTile;
     public bool EnableInput;
+    private bool[,] previousBoardState;
 
     private NetworkManager networkManager;
 
@@ -30,6 +32,8 @@ public class Board : MonoBehaviour
         for(int i = 0; i<this.tetrominoes.Length; i++){
             this.tetrominoes[i].Initialize();
         }
+
+        previousBoardState = new bool[boardSize.x, boardSize.y];
     }
 
     private void Start(){
@@ -304,4 +308,27 @@ public class Board : MonoBehaviour
         return boardState;
     }
     */
+
+    public List<(int x, int y, bool hasTile)> GetChangedTiles()
+    {
+        RectInt bounds = this.Bounds;
+        List<(int x, int y, bool hasTile)> changes = new List<(int x, int y, bool hasTile)>();
+
+        for (int y = bounds.yMin; y < bounds.yMax; y++)
+        {
+            for (int x = bounds.xMin; x < bounds.xMax; x++)
+            {
+                Vector3Int pos = new Vector3Int(x, y, 0);
+                bool hasTile = tilemap.HasTile(pos);
+
+                // 이전 상태와 현재 상태 비교
+                if (previousBoardState[x - bounds.xMin, y - bounds.yMin] != hasTile)
+                {
+                    changes.Add((x, y, hasTile));
+                    previousBoardState[x - bounds.xMin, y - bounds.yMin] = hasTile; // 상태 업데이트
+                }
+            }
+        }
+        return changes;
+    }
 }
