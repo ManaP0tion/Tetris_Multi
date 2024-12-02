@@ -25,9 +25,8 @@ void* cli_to_cli(void* cli_socket) {
     char buffer[1024];
     int rlen;
 
+    printf("cli_to_cli start: %d\n", cli_from);
     while (1) {
-        
-        printf("cli_to_cli start: %d\n", cli_from);
         if ((rlen = recv(cli_from, buffer, sizeof(buffer) - 1, 0))) {
             buffer[rlen] = '\0';
             printf("cli %d to  %d: %s\n", cli_from, cli_to, buffer);
@@ -50,7 +49,7 @@ void* cli_to_cli(void* cli_socket) {
 
 void make_room(int cli1, int cli2) {
     pthread_t thread1, thread2;
-
+    
     char *gs_msg = "GAMESTART";
 
     printf("room create\n");
@@ -58,7 +57,7 @@ void make_room(int cli1, int cli2) {
     // game start
     send(cli1, gs_msg , strlen(gs_msg ), 0);
     send(cli2, gs_msg , strlen(gs_msg ), 0);
-
+    
 
     // cli1 to cli2
     pair* cli_pair1 = malloc(sizeof(pair));
@@ -99,6 +98,9 @@ int main() {
         exit(1);
     }
 
+    int optvalue=1;
+    setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optvalue, sizeof(optvalue));
+
     memset((char*)&sin, '\0', sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = INADDR_ANY;
@@ -116,7 +118,7 @@ int main() {
    printf("waiting\n");
 
     while ((ns = accept(sd, (struct sockaddr*)&csin, &lns)) >= 0) {
-   printf("accept IP=%s,  %d\n",  inet_ntoa(csin.sin_addr),ns);
+        printf("accept IP=%s,  %d\n",  inet_ntoa(csin.sin_addr),ns);
 
         pthread_mutex_lock(&lock);
 

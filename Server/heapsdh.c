@@ -9,7 +9,7 @@
 #define PORT 27015
 #define MAX_CLIENTS 100
 
-/*thread´Â accpet¸¦ ÇÑ °á°ú¸¦ queue¿¡ ÀúÀåÇÏ°í mainÀº room¸¸ »ý¼º*/
+/*threadï¿½ï¿½ accpetï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ queueï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ mainï¿½ï¿½ roomï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½*/
 
 int wait_cli[MAX_CLIENTS];
 int wait_count = 0;
@@ -53,7 +53,8 @@ void* cli_to_cli(void* cli_socket) {
     int rlen;
 
     while (1) {
-        if ((rlen = recv(cli_from, buffer, sizeof(buffer) - 1, 0)) == -1) {
+            printf("cli_to_cli start: %d\n", cli_from);
+        if ((rlen = recv(cli_from, buffer, sizeof(buffer) - 1, 0))) {
             buffer[rlen] = '\0';
             printf("cli %d : %s\n", cli_from, buffer);
 

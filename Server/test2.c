@@ -17,7 +17,8 @@ void* cli_to_cli(void* socket) {
     int rlen;
 
     /* receive data */
-    while ((rlen = recv(ans, buffer, sizeof(buffer) - 1, 0) == -1) {
+        printf("cli_to_cli start: %d\n", cli_from);
+    while ((rlen = recv(ans, buffer, sizeof(buffer) - 1, 0)) {
         buffer[rlen] = '\0';
         printf("receive: %s\n", buffer);
 

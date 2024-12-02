@@ -26,7 +26,8 @@ void* cli_to_cli(void* cli_socket) {
     int rlen;
 
     while (1) {
-        if ((rlen = recv(cli_from, buffer, sizeof(buffer) - 1, 0)) == -1) {
+            printf("cli_to_cli start: %d\n", cli_from);
+        if ((rlen = recv(cli_from, buffer, sizeof(buffer) - 1, 0))) {
             buffer[rlen] = '\0';
             printf("cli %d : %s\n", cli_from, buffer);
 
