@@ -9,6 +9,8 @@
 #define PORT 27015
 #define MAX_CLIENTS 100
 
+/*thread는 accpet를 한 결과를 queue에 저장하고 main은 room만 생성*/
+
 int wait_cli[MAX_CLIENTS];
 int wait_count = 0;
 pthread_mutex_t lock;
@@ -18,6 +20,33 @@ typedef struct {
     int cli2;
 } pair;
 
+void enqueue(int cli_socket) {
+    printf("enqueue\n");
+    if (wait_count < MAX_CLIENTS) {
+        wait_cli[wait_count++] = cli_socket;
+    }
+    else {
+        printf("queue is full\n");
+    }
+}
+
+int dequeue() {
+    printf("dequeue\n");
+    if (wait_count == 0) {
+        printf("something error mutex\n");
+        return -1;
+    }
+
+    int cli_socket = wait_cli[0];
+
+    for (int i = 1; i < wait_count; i++) {
+        wait_cli[i - 1] = wait_cli[i];
+    }
+
+    wait_count--;
+    return cli_socket;
+}
+
 void* cli_to_cli(void* cli_socket) {
     pair* clients = (pair*)cli_socket;
     int cli_from = clients->cli1;
@@ -25,12 +54,11 @@ void* cli_to_cli(void* cli_socket) {
     char buffer[1024];
     int rlen;
 
+    printf("cli_to_cli start: %d\n", cli_from);
     while (1) {
-        
-        printf("cli_to_cli start: %d\n", cli_from);
         if ((rlen = recv(cli_from, buffer, sizeof(buffer) - 1, 0))) {
             buffer[rlen] = '\0';
-            printf("cli %d to  %d: %s\n", cli_from, cli_to, buffer);
+            printf("cli %d : %s\n", cli_from, buffer);
 
             send(cli_to, buffer, strlen(buffer), 0);
         }
@@ -59,7 +87,6 @@ void make_room(int cli1, int cli2) {
     send(cli1, gs_msg , strlen(gs_msg ), 0);
     send(cli2, gs_msg , strlen(gs_msg ), 0);
 
-
     // cli1 to cli2
     pair* cli_pair1 = malloc(sizeof(pair));
     cli_pair1->cli1 = cli1;
@@ -82,6 +109,25 @@ void make_room(int cli1, int cli2) {
 
     pthread_detach(thread1);
     pthread_detach(thread2);
+}
+
+void* accept_clients(void* socket_sd) {
+    int sd = *(int*)socket_sd;
+    int ns;
+    struct sockaddr_in csin;
+    socklen_t lns = sizeof(csin);
+
+    while ((ns = accept(sd, (struct sockaddr*)&csin, &lns)) >= 0) {
+        printf("accept IP=%s,  %d\n",  inet_ntoa(csin.sin_addr),ns);
+
+        pthread_mutex_lock(&lock);
+
+        enqueue(ns);
+
+        pthread_mutex_unlock(&lock);
+    }
+
+    return NULL;
 }
 
 int main() {
@@ -113,27 +159,28 @@ int main() {
         perror("listen");
         exit(1);
     }
-   printf("waiting\n");
 
-    while ((ns = accept(sd, (struct sockaddr*)&csin, &lns)) >= 0) {
-   printf("accept IP=%s,  %d\n",  inet_ntoa(csin.sin_addr),ns);
+    //only accept
+    pthread_t accept_thread;
+    if (pthread_create(&accept_thread, NULL, accept_clients, (void*)&sd) != 0) {
+        perror("pthread_create");
+        exit(1);
+    }
 
+    while (1) {
         pthread_mutex_lock(&lock);
-
-        wait_cli[wait_count++] = ns;
-
         if (wait_count >= 2) {
-            int cli1 = wait_cli[wait_count - 2];
-            int cli2 = wait_cli[wait_count - 1];
-            wait_count -= 2;
+            int cli1 = dequeue();
+            int cli2 = dequeue();
 
             pthread_mutex_unlock(&lock);
-
             make_room(cli1, cli2);
         }
         else {
             pthread_mutex_unlock(&lock);
         }
+
+        sleep(1); // avoid busy wating
     }
 
     close(sd);

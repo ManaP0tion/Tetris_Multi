@@ -25,12 +25,11 @@ void* cli_to_cli(void* cli_socket) {
     char buffer[1024];
     int rlen;
 
+    printf("cli_to_cli start: %d\n", cli_from);
     while (1) {
-        
-        printf("cli_to_cli start: %d\n", cli_from);
         if ((rlen = recv(cli_from, buffer, sizeof(buffer) - 1, 0))) {
             buffer[rlen] = '\0';
-            printf("cli %d to  %d: %s\n", cli_from, cli_to, buffer);
+            printf("cli %d : %s\n", cli_from, buffer);
 
             send(cli_to, buffer, strlen(buffer), 0);
         }
@@ -59,7 +58,6 @@ void make_room(int cli1, int cli2) {
     send(cli1, gs_msg , strlen(gs_msg ), 0);
     send(cli2, gs_msg , strlen(gs_msg ), 0);
 
-
     // cli1 to cli2
     pair* cli_pair1 = malloc(sizeof(pair));
     cli_pair1->cli1 = cli1;
@@ -84,12 +82,33 @@ void make_room(int cli1, int cli2) {
     pthread_detach(thread2);
 }
 
+void* make_room_thread(void* arg) {
+    int cli_socket = *((int*)arg);
+
+    pthread_mutex_lock(&lock);
+
+    wait_cli[wait_count++] = cli_socket;
+
+    if (wait_count >= 2) {
+        int cli1 = wait_cli[wait_count - 2];
+        int cli2 = wait_cli[wait_count - 1];
+        wait_count -= 2;
+
+        pthread_mutex_unlock(&lock);
+
+        make_room(cli1, cli2);
+    }
+    else {
+        pthread_mutex_unlock(&lock);
+    }
+
+    return NULL;
+}
+
 int main() {
     int sd, ns;
     struct sockaddr_in sin, csin;
     socklen_t lns = sizeof(csin);
-
-    memset(wait_cli, 0, sizeof(wait_cli));
 
     pthread_mutex_init(&lock, NULL);
 
@@ -98,6 +117,10 @@ int main() {
         perror("socket");
         exit(1);
     }
+    
+    int optvalue=1;
+    setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optvalue, sizeof(optvalue));
+
 
     memset((char*)&sin, '\0', sizeof(sin));
     sin.sin_family = AF_INET;
@@ -113,27 +136,14 @@ int main() {
         perror("listen");
         exit(1);
     }
-   printf("waiting\n");
 
     while ((ns = accept(sd, (struct sockaddr*)&csin, &lns)) >= 0) {
-   printf("accept IP=%s,  %d\n",  inet_ntoa(csin.sin_addr),ns);
+        printf("accept IP=%s,  %d\n",  inet_ntoa(csin.sin_addr),ns);
 
-        pthread_mutex_lock(&lock);
 
-        wait_cli[wait_count++] = ns;
-
-        if (wait_count >= 2) {
-            int cli1 = wait_cli[wait_count - 2];
-            int cli2 = wait_cli[wait_count - 1];
-            wait_count -= 2;
-
-            pthread_mutex_unlock(&lock);
-
-            make_room(cli1, cli2);
-        }
-        else {
-            pthread_mutex_unlock(&lock);
-        }
+        pthread_t client_thread;
+        pthread_create(&client_thread, NULL, make_room_thread, (void*)&ns);
+        pthread_detach(client_thread);
     }
 
     close(sd);
