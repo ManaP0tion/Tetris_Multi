@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
@@ -25,8 +26,8 @@ public class NetworkManager : MonoBehaviour
     {
         try
         {
-            client = new TcpClient("211.188.49.52", 27015);   // naver
-            //client = new TcpClient("172.27.123.18", 27015);     // wsl
+            //client = new TcpClient("211.188.49.52", 27015);   // naver
+            client = new TcpClient("172.27.123.18", 27015);     // wsl
             stream = client.GetStream();
             Debug.Log("Connected to server.");
         }
@@ -120,5 +121,29 @@ public class NetworkManager : MonoBehaviour
         }
     }
     */
+    public void SendChangedTiles(List<(int x, int y, bool hasTile)> changes)
+{
+    if (client != null && stream != null)
+    {
+        byte[] header = Encoding.UTF8.GetBytes("CHANGED_TILES:"); // 헤더 추가
+        byte[] data = new byte[changes.Count * 3 + header.Length];
+
+        // 헤더 복사
+        System.Buffer.BlockCopy(header, 0, data, 0, header.Length);
+
+        // 변경된 셀 데이터 직렬화
+        int offset = header.Length;
+        foreach (var change in changes)
+        {
+            data[offset++] = (byte)change.x;        // x 좌표
+            data[offset++] = (byte)change.y;        // y 좌표
+            data[offset++] = (byte)(change.hasTile ? 1 : 0); // 타일 유무
+        }
+
+        // 데이터 전송
+        stream.Write(data, 0, data.Length);
+        Debug.Log($"Sent {changes.Count} changed tiles to server.");
+    }
+}
 
 }
