@@ -58,7 +58,7 @@ public class P2Board : MonoBehaviour
     {
         foreach (var change in changes)
         {
-            Vector3Int position = new Vector3Int(change.x - boardSize.x / 2, change.y - boardSize.y / 2, 0);
+            Vector3Int position = new Vector3Int(change.x, change.y , 0);
 
             if (change.hasTile)
             {
