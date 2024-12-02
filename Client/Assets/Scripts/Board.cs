@@ -311,27 +311,24 @@ public class Board : MonoBehaviour
 
     public List<(int x, int y, bool hasTile)> GetChangedTiles()
     {
-    RectInt bounds = this.Bounds;
-    List<(int x, int y, bool hasTile)> changes = new List<(int x, int y, bool hasTile)>();
+        RectInt bounds = this.Bounds;
+        List<(int x, int y, bool hasTile)> changes = new List<(int x, int y, bool hasTile)>();
 
-    for (int y = bounds.yMin; y < bounds.yMax; y++)
-    {
-        for (int x = bounds.xMin; x < bounds.xMax; x++)
+        for (int y = bounds.yMin; y < bounds.yMax; y++)
         {
-            Vector3Int pos = new Vector3Int(x, y, 0);
-            bool hasTile = tilemap.HasTile(pos);
-
-            // 이전 상태와 현재 상태 비교
-            if (previousBoardState[x - bounds.xMin, y - bounds.yMin] != hasTile)
+            for (int x = bounds.xMin; x < bounds.xMax; x++)
             {
-                changes.Add((x, y, hasTile));
-                previousBoardState[x - bounds.xMin, y - bounds.yMin] = hasTile; // 상태 업데이트
+                Vector3Int pos = new Vector3Int(x, y, 0);
+                bool hasTile = tilemap.HasTile(pos);
+
+                // 이전 상태와 현재 상태 비교
+                if (previousBoardState[x - bounds.xMin, y - bounds.yMin] != hasTile)
+                {
+                    changes.Add((x, y, hasTile));
+                    previousBoardState[x - bounds.xMin, y - bounds.yMin] = hasTile; // 상태 업데이트
+                }
             }
         }
+        return changes;
     }
-
-    return changes;
-}
-
-
 }

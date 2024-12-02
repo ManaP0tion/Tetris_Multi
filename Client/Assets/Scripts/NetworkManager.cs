@@ -10,15 +10,13 @@ public class NetworkManager : MonoBehaviour
     private NetworkStream stream;
     public bool IsGameReady { get; private set; }
     public Board board;
-
-    public float updateInterval = 1f;
+    public P2Board p2board;
+    private string receiveBuffer = "";
 
     private void Start()
     {
-        if (board == null)
-        {
-            board = FindObjectOfType<Board>();
-        }
+        board = FindObjectOfType<Board>();
+        p2board = FindObjectOfType<P2Board>();
         ConnectToServer();
     }
 
@@ -39,62 +37,116 @@ public class NetworkManager : MonoBehaviour
 
     public void SendLineClear(int linesCleared)
     {
-        if (client != null && stream != null)
+        if (stream != null)
         {
-            string message = $"CLEAR:{linesCleared}";
+            string message = $"CLEAR:{linesCleared}\n";
             byte[] data = Encoding.UTF8.GetBytes(message);
             stream.Write(data, 0, data.Length);
-            Debug.Log($"Sent line clear data: {message}");
         }
     }
     private void Update() {
-        ReceiveData();
-        /*
-        if (IsGameReady && board != null)
+        if (client != null && stream != null)
         {
-            StartCoroutine(BoardUpdate());
-        }*/
+            ReceiveData();
+        }
     }
     
-    public void ReceiveData()
+    private void ReceiveData()
     {
-        if (client != null && stream != null && stream.DataAvailable)
+        if (stream.DataAvailable)
         {
             byte[] buffer = new byte[1024];
             int bytesRead = stream.Read(buffer, 0, buffer.Length);
-            string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            Debug.Log($"Received from server: {message}"); // 모든 메시지 로깅
-            // 처리 로직
-            HandleServerMessage(message);
+            if (bytesRead > 0)
+            {
+                string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                receiveBuffer += receivedData;
+
+                string[] messages = receiveBuffer.Split('\n');
+                for (int i = 0; i < messages.Length - 1; i++)
+                {
+                    HandleServerMessage(messages[i].Trim());
+                }
+                receiveBuffer = messages[messages.Length - 1];
+            }
+        }
+    }
+    
+    private void HandleServerMessage(string message)
+    {
+        if (string.IsNullOrEmpty(message)) return;
+
+        if (message.StartsWith("CLEAR:"))
+        {
+            if (int.TryParse(message.Split(':')[1], out int linesToAdd))
+            {
+                board.AddLines(linesToAdd);
+                Debug.Log($"Adding {linesToAdd} lines to the board.");
+            }
+        }
+        else if (message.Contains("GAMESTART"))
+        {
+            Debug.Log("Game Start received from server.");
+            IsGameReady = true;
+        }
+
+        else if (message.StartsWith("CHANGES:"))
+        {
+            string[] changes = message.Substring(8).Split(';');
+            List<(int x, int y, bool hasTile)> tileChanges = new List<(int x, int y, bool hasTile)>();
+
+            foreach (string change in changes)
+            {
+                if (!string.IsNullOrWhiteSpace(change))
+                {
+                    string[] parts = change.Split(',');
+                    if (parts.Length == 3)
+                    {
+                        int x = int.Parse(parts[0]);
+                        int y = int.Parse(parts[1]);
+                        bool hasTile = parts[2] == "1";
+                        tileChanges.Add((x, y, hasTile));
+                    }
+                }
+            }
+            
+            // Apply the changes to the P2Board
+            p2board.ApplyChanges(tileChanges);
+            Debug.Log("Applied changes to P2Board.");
         }
     }
 
-    private void HandleServerMessage(string message)
-    {
-        if (message.StartsWith("CLEAR:"))
-        {
-            int linesToAdd = int.Parse(message.Split(':')[1]); // 숫자 추출
-            FindObjectOfType<Board>().AddLines(linesToAdd);
-            Debug.Log($"Adding {linesToAdd} lines to the board.");
-        }
-        if (message.Contains("GAMESTART"))
-        {
-            Debug.Log("Game Start received from server.");
-            // 게임 시작 로직 트리거
-            IsGameReady = true;
-        }
-    }
 
     public void SendGameOver()
     {
         if (client != null && stream != null)
         {
-            string message = "GAME_OVER";
+            string message = "GAME_OVER\n";
             byte[] data = Encoding.UTF8.GetBytes(message);
             stream.Write(data, 0, data.Length);
             Debug.Log("Sent game over message to server.");
         }
     }
+    public void SendChangedTiles(List<(int x, int y, bool hasTile)> changes)
+    {
+        if (stream != null)
+        {
+            StringBuilder messageBuilder = new StringBuilder("CHANGES:");
+
+            foreach (var change in changes)
+            {
+                messageBuilder.Append($"{change.x},{change.y},{(change.hasTile ? 1 : 0)};");
+            }
+
+            messageBuilder.Append("\n");
+
+            string message = messageBuilder.ToString();
+            byte[] data = Encoding.UTF8.GetBytes(message);
+            stream.Write(data, 0, data.Length);
+            Debug.Log($"Sent changed tiles as string: {message.Trim()}");
+        }
+    }
+
 
     private void OnApplicationQuit()
     {
@@ -102,48 +154,6 @@ public class NetworkManager : MonoBehaviour
         client?.Close();
     }
 
-        /*
-    public void SendBoardState(string boardState)
-    {
-        if (client != null && stream != null)
-        {
-            string message = "BOARD_STATE:" + boardState;
-            byte[] data = Encoding.UTF8.GetBytes(message);
-            stream.Write(data, 0, data.Length);
-            //Debug.Log("Board state sent to server.");
-        }
-    }
 
-    IEnumerator BoardUpdate(){
-        while(true){
-            SendBoardState(board.GetBoardStateAsString());
-            yield return new WaitForSeconds(updateInterval);
-        }
-    }
-    */
-    public void SendChangedTiles(List<(int x, int y, bool hasTile)> changes)
-{
-    if (client != null && stream != null)
-    {
-        byte[] header = Encoding.UTF8.GetBytes("CHANGED_TILES:"); // 헤더 추가
-        byte[] data = new byte[changes.Count * 3 + header.Length];
-
-        // 헤더 복사
-        System.Buffer.BlockCopy(header, 0, data, 0, header.Length);
-
-        // 변경된 셀 데이터 직렬화
-        int offset = header.Length;
-        foreach (var change in changes)
-        {
-            data[offset++] = (byte)change.x;        // x 좌표
-            data[offset++] = (byte)change.y;        // y 좌표
-            data[offset++] = (byte)(change.hasTile ? 1 : 0); // 타일 유무
-        }
-
-        // 데이터 전송
-        stream.Write(data, 0, data.Length);
-        Debug.Log($"Sent {changes.Count} changed tiles to server.");
-    }
-}
 
 }
