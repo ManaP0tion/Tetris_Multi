@@ -29,7 +29,7 @@ void* cli_to_cli(void* cli_socket) {
     while (1) {
         if ((rlen = recv(cli_from, buffer, sizeof(buffer) - 1, 0))) {
             buffer[rlen] = '\0';
-            printf("cli %d : %s\n", cli_from, buffer);
+            //printf("cli %d : %s\n", cli_from, buffer);
 
             send(cli_to, buffer, strlen(buffer), 0);
         }
@@ -52,14 +52,14 @@ void make_room(int cli1, int cli2) {
 
     char *gs_msg = "GAMESTART";
 
-    printf("room create\n");
+    //printf("room create\n");
 
     // game start
     send(cli1, gs_msg , strlen(gs_msg ), 0);
     send(cli2, gs_msg , strlen(gs_msg ), 0);
 
     // cli1 to cli2
-    pair* cli_pair1 = malloc(sizeof(pair));
+    pair* cli_pair1 = (pair*)malloc(sizeof(pair));
     cli_pair1->cli1 = cli1;
     cli_pair1->cli2 = cli2;
 
@@ -69,7 +69,7 @@ void make_room(int cli1, int cli2) {
     }
 
     // cli2 to cli1
-    pair* cli_pair2 = malloc(sizeof(pair));
+    pair* cli_pair2 = (pair*)malloc(sizeof(pair));
     cli_pair2->cli1 = cli2;
     cli_pair2->cli2 = cli1;
 
@@ -140,9 +140,11 @@ int main() {
     while ((ns = accept(sd, (struct sockaddr*)&csin, &lns)) >= 0) {
         printf("accept IP=%s,  %d\n",  inet_ntoa(csin.sin_addr),ns);
 
-
+        int* cli_socket = malloc(sizeof(int));
+        *cli_socket = ns;
+        
         pthread_t client_thread;
-        pthread_create(&client_thread, NULL, make_room_thread, (void*)&ns);
+        pthread_create(&client_thread, NULL, make_room_thread, (void*)cli_socket);
         pthread_detach(client_thread);
     }
 

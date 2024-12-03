@@ -29,7 +29,7 @@ void* cli_to_cli(void* cli_socket) {
     while (1) {
         if ((rlen = recv(cli_from, buffer, sizeof(buffer) - 1, 0))) {
             buffer[rlen] = '\0';
-            printf("cli %d to  %d: %s\n", cli_from, cli_to, buffer);
+            //printf("cli %d to  %d: %s\n", cli_from, cli_to, buffer);
 
             send(cli_to, buffer, strlen(buffer), 0);
         }
@@ -52,7 +52,7 @@ void make_room(int cli1, int cli2) {
     
     char *gs_msg = "GAMESTART";
 
-    printf("room create\n");
+    //printf("room create\n");
 
     // game start
     send(cli1, gs_msg , strlen(gs_msg ), 0);
@@ -115,7 +115,7 @@ int main() {
         perror("listen");
         exit(1);
     }
-   printf("waiting\n");
+   //printf("waiting\n");
 
     while ((ns = accept(sd, (struct sockaddr*)&csin, &lns)) >= 0) {
         printf("accept IP=%s,  %d\n",  inet_ntoa(csin.sin_addr),ns);
