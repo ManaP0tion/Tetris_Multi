@@ -164,3 +164,22 @@ int main() {
 
     return 0;
 }
+
+   /*
+       int another = *(int *)arg;
+    char buffer[BUFFER_SIZE];
+
+    while (check) {
+        memset(buffer, 0, BUFFER_SIZE);
+        int bytes_received = read(another, buffer, BUFFER_SIZE);
+        if (bytes_received <= 0) {
+            printf("disconect\n");
+            check = 0;
+            break;
+        }
+        printf("another: %s", buffer);
+        fflush(stdout);
+    }
+
+    return NULL;
+    */

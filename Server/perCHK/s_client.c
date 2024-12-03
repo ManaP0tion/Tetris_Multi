@@ -9,6 +9,8 @@
 
 #define PORT 27015
 
+int check_loop = 1;
+
 typedef struct {
     int sd;
     FILE* file;
@@ -23,14 +25,14 @@ void* receive_message(void* targeting) {
     FILE* file = ts->file;
     struct timeval t1, t2;
 
-    while (1) {
+    while (check_loop) {
         gettimeofday(&t1, NULL);
         rlen = recv(sd, buffer, sizeof(buffer) - 1, 0);
         buffer[rlen] = '\0';
         gettimeofday(&t2, NULL);
 
         if (rlen > 0) {
-            printf("received: %s\n", buffer);
+            //printf("received: %s\n", buffer);
             double performance_time = (t2.tv_sec + t2.tv_usec * 0.000001) - (t1.tv_sec + t1.tv_usec * 0.000001);
             //printf("time: %f\n", performance_time);
             fprintf(file, "%f\n", performance_time);
@@ -93,7 +95,7 @@ void send_matrix(int sd, int matrix[10][20]) {
     matrix_str[strlen(matrix_str) - 1] = '\0';
 
     send(sd, matrix_str, strlen(matrix_str), 0);
-    printf("Matrix sent\n");
+    //printf("Matrix sent\n");
     
    /*
    char buffer[1024];
@@ -170,10 +172,10 @@ int main(int argc, char* argv[]) {
         if (rlen > 0) {
             buffer[rlen] = '\0';         
             if (strcmp(buffer, "GAMESTART") == 0) {
-                printf("game start\n");
+                //printf("game start\n");
                 break;
             }
-            printf("GAMESTART loop\n");
+            //printf("GAMESTART loop\n");
         }
     }
     /*
@@ -188,16 +190,21 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    for (int main_loop = 0; main_loop < 100; main_loop++) {
+    for (int main_loop = 0; main_loop < 10; main_loop++) {
         sleep(1);
-        printf("loop\n");
+        //printf("loop\n");
         generate_matrix(matrix);
         send_matrix(sd, matrix);
     }
+
+    check_loop = 0;
+
 
     pthread_join(thread1, NULL);
 
     close(sd);
     fclose(file);
+
+    printf("end cli: %s\n",argv[1]);
     return 0;
 }

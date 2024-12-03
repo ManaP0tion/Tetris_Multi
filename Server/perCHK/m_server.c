@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#define PORTNUM 12056
+#define PORTNUM 27015
 #define BUFFER_SIZE 1024
 
 typedef struct {
@@ -28,7 +28,7 @@ void *connect_cli(void *arg) {
 
     if (first_cli == NULL) {
         // first client
-        printf("wait another\n");
+        //printf("wait another\n");
         first_cli = client;
         pthread_mutex_unlock(&client_mutex);
 
@@ -60,12 +60,15 @@ void *connect_cli(void *arg) {
 
         // decide who client-client
         //int listen_port = PORTNUM + 1; // port +1
+        pthread_mutex_lock(&check_mutex);
         sprintf(buffer, "initiator %d", listen_port);
+        //printf("-%s-\n",buffer);
         send(client->socket, buffer, strlen(buffer), 0);
 
 
         // decide who client-server
         sprintf(buffer, "listener %s %d", inet_ntoa(client->address.sin_addr), listen_port);
+        //printf("-%s-\n",buffer);
         send(one_cli->socket, buffer, strlen(buffer), 0);
 
 
@@ -100,10 +103,10 @@ int main() {
     setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optvalue, sizeof(optvalue));
 
 
-    memset((char *)&sin, '\0', sizeof(sin));
+    memset((char*)&sin, '\0', sizeof(sin));
     sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = INADDR_ANY;
     sin.sin_port = htons(PORTNUM);
-    sin.sin_addr.s_addr = inet_addr("0.0.0.0");
 
     if (bind(sd, (struct sockaddr *)&sin, sizeof(sin))) {
         perror("bind");
