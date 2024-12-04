@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 
 #define PORT 27015
-#define MAX_CLIENTS 100
+#define MAX_CLIENTS 1000
 
 int wait_cli[MAX_CLIENTS];
 int wait_count = 0;
