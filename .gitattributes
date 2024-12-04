@@ -1,0 +1,3 @@
+# Shaderlab 및 HLSL 파일을 언어 통계에서 제외
+*.shader linguist-vendored
+*.hlsl linguist-vendored
