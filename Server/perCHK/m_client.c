@@ -60,7 +60,7 @@ void *checkOK(void *arg) {
         pthread_mutex_unlock(&check_mutex);
             break;
         }
-        //printf("another: %s", buffer);
+        printf("another: %s", buffer);
         //fflush(stdout);
     }
 
@@ -121,7 +121,7 @@ void chating(int another, char *filename) {
     for (int main_loop = 0; main_loop < 100; main_loop++) {
     
     send(another, matrix_str, strlen(matrix_str), 0);
-    //printf("Matrix sent\n");
+    printf("Matrix sent\n");
     sleep(1);
     }
     check_loop = 0;
@@ -200,7 +200,7 @@ void listening(int listen_ns, char *filename) {
         return;
     }
 
-    //printf("wait\n");
+    printf("wait\n");
 
     if ((another = accept(lns, NULL, NULL)) == -1) {
         perror("accept");
@@ -276,12 +276,12 @@ int main(int argc, char* argv[]) {
 
         // decide who make server
         if (sscanf(buffer, "listener %s %d", anther_ip, &second_ns) == 2) {
-            //printf("im listener\n");
+            printf("im listener\n");
 			close(ns);
             //servering(anther_ip, second_ns);
             servering(anther_ip, second_ns,filename);
         } else if (sscanf(buffer, "initiator %d", &second_ns) == 1) {
-            //printf("im initiator\n");
+            printf("im initiator\n");
 			close(ns);
            //listening(second_ns);
             listening(second_ns,filename);
