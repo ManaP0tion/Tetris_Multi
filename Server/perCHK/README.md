@@ -25,3 +25,7 @@ p2p server는 m_server, m_client를 실행하면 됩니다
 (숫자)_go.txt는 서버에 접속시간이 저장됩니다.
 ***
 s_client.c, m_client.c 모두 127.0.0.1(내부망)에 접속, 필요시 적절히 변경
+  
+***
+저희가 했던 ppt에 했던 테스트 기준으로 listen port 1000,  wait_cli 1000으로 설정했습니다.  
+fork를 1000회 이상하면 오류 가능성이 있습니다
