@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 
 #define PORT 27015
-#define MAX_CLIENTS 100
+#define MAX_CLIENTS 1000
 
 /*thread는 accpet를 한 결과를 queue에 저장하고 main은 room만 생성*/
 
