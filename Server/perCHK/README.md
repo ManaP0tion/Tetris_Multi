@@ -1,6 +1,6 @@
 -make 가능
 
-s_testsdh/s_roomsdh/s_queue 중 원하는서버를 실행 후, 
+s_testsdh/s_roomsdh/s_queue 중 원하는서버를 실행 후,  
 s_chk_performance을 통해서 성능을 채크합니다.
 
 s_chk_performance는 s_client를 fork, exec로 실행합니다  
