@@ -1,12 +1,9 @@
 CC = gcc
 CFLAGS = -Wall -pthread
 
-TARGETS = m_chk_performance m_server s_client s_roomsdh m_client s_chk_performance s_queue s_testsdh
+TARGETS =  m_server s_client s_roomsdh m_client s_chk_performance s_queue s_testsdh
 
 all: $(TARGETS)
-
-m_chk_performance: m_chk_performance.c
-	$(CC) $(CFLAGS) m_chk_performance.c -o m_chk_performance
 
 m_server: m_server.c
 	$(CC) $(CFLAGS) m_server.c -o m_server
