@@ -128,7 +128,7 @@ int main() {
         exit(1);
     }
 
-    if (listen(sd, 3) < 0) {
+    if (listen(sd, 100) < 0) {
         perror("listen");
         exit(1);
     }
