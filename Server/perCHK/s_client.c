@@ -171,7 +171,7 @@ int main(int argc, char* argv[]) {
         rlen = recv(sd, buffer, sizeof(buffer) - 1, 0);
         if (rlen > 0) {
             buffer[rlen] = '\0';         
-            if (strcmp(buffer, "GAMESTART") == 0) {
+            if (strcmp(buffer, "GAMESTART\n") == 0) {
                 //printf("game start\n");
                 break;
             }
