@@ -190,7 +190,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    for (int main_loop = 0; main_loop < 10; main_loop++) {
+    for (int main_loop = 0; main_loop < 100; main_loop++) {
         sleep(1);
         //printf("loop\n");
         generate_matrix(matrix);
