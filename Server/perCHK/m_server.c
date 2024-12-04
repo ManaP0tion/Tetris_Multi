@@ -60,15 +60,14 @@ void *connect_cli(void *arg) {
 
         // decide who client-client
         //int listen_port = PORTNUM + 1; // port +1
-        pthread_mutex_lock(&check_mutex);
         sprintf(buffer, "initiator %d", listen_port);
-        //printf("-%s-\n",buffer);
+        printf("-%s-\n",buffer);
         send(client->socket, buffer, strlen(buffer), 0);
 
 
         // decide who client-server
         sprintf(buffer, "listener %s %d", inet_ntoa(client->address.sin_addr), listen_port);
-        //printf("-%s-\n",buffer);
+                printf("-%s-\n",buffer);
         send(one_cli->socket, buffer, strlen(buffer), 0);
 
 
@@ -117,6 +116,7 @@ int main() {
         perror("listen");
         exit(1);
     }
+	printf("server start!\n");
 
     while (1) {
         // client buffer, use malloc to use thread
@@ -140,4 +140,3 @@ int main() {
     close(sd);
     return 0;
 }
-
