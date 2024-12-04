@@ -134,11 +134,15 @@ int main() {
     }
 
     while ((ns = accept(sd, (struct sockaddr*)&csin, &lns)) >= 0) {
-        printf("accept!\n");
+        printf("accept IP=%s,  %d\n",  inet_ntoa(csin.sin_addr),ns);
+
+        int* cli_socket = malloc(sizeof(int));
+        *cli_socket = ns;
 
         pthread_t client_thread;
-        pthread_create(&client_thread, NULL, make_room_thread, (void*)&ns);
+        pthread_create(&client_thread, NULL, make_room_thread, (void*)cli_socket);
         pthread_detach(client_thread);
+
     }
 
     close(sd);
