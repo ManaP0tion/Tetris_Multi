@@ -50,7 +50,7 @@ void* cli_to_cli(void* cli_socket) {
 void make_room(int cli1, int cli2) {
     pthread_t thread1, thread2;
 
-    char *gs_msg = "GAMESTART\n";
+    char *gs_msg = "GAMESTART";
 
     //printf("room create\n");
 
@@ -142,7 +142,7 @@ int main() {
 
         int* cli_socket = malloc(sizeof(int));
         *cli_socket = ns;
-        
+
         pthread_t client_thread;
         pthread_create(&client_thread, NULL, make_room_thread, (void*)cli_socket);
         pthread_detach(client_thread);
