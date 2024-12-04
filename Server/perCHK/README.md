@@ -7,6 +7,7 @@ s_queue
 s_chk_performance을 통해서 성능을 채크합니다.
 
 s_chk_performance는 s_client를 fork, exec로 실행합니다  
+s_client는 상대방 cli에게 10*20의 배열을 1초 단위로 100번 전달 후 자동으로 종료됩니다.  
   
 s_chk_performance의 fork 횟수는
 #define MAXFORK 100의 개수를 조절해서 조정 가능합니다.  
