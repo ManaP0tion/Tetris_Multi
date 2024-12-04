@@ -11,3 +11,6 @@
 
 4. roomsdh.c
    thread를 이용해서 room을 처리합니다.
+
+***
+테스트 성능은 perCHK/ 디렉토리로 가면 됩니다
